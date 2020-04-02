@@ -40,5 +40,9 @@
 .keyboard__key--space {
   width: 330px;
 }
+.keyboard__key--pressed {
+  color: #000000;
+  background-color: #ffffff;
+}
 
 /*# sourceMappingURL=style.css.map */
