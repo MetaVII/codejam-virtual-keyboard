@@ -465,7 +465,8 @@ const keyList = [
       },
       {
         eng: 'Ctrl',
-        className: 'keyboard__key keyboard__key--secondary-color',
+        className:
+          'keyboard__key keyboard__key--secondary-color keyboard__key--bold',
         code: 'ControlRight',
       },
     ],
@@ -494,6 +495,14 @@ const CONTAINER = document.createElement('div');
 CONTAINER.classList.add('keyboard__container');
 document.body.append(CONTAINER);
 
+const LEGEND = document.createElement('p');
+LEGEND.classList.add('legend');
+LEGEND.innerHTML =
+  'Клавиатура создана в операционной системе Windows. Переключение языка ctrl + alt';
+document.body.append(LEGEND);
+
+let isCapsActive = false;
+
 // print button inside textarea
 function printButton(text, code) {
   if (
@@ -511,10 +520,24 @@ function printButton(text, code) {
 
   const { selectionStart, selectionEnd } = TEXTAREA;
 
+  if (code === 'ArrowLeft') {
+    if (selectionStart > 0) {
+      TEXTAREA.selectionStart -= 1;
+      TEXTAREA.selectionEnd -= 1;
+    }
+    return;
+  }
+
+  if (code === 'ArrowRight') {
+    TEXTAREA.selectionEnd += 1;
+    TEXTAREA.selectionStart += 1;
+    return;
+  }
+
   if (code === 'Backspace' || code === 'Delete') {
     if (selectionStart !== selectionEnd) {
       TEXTAREA.setRangeText('', selectionStart, selectionEnd, 'end');
-    } else if (code === 'Backspace') {
+    } else if (code === 'Backspace' && selectionStart > 0) {
       TEXTAREA.setRangeText('', selectionStart - 1, selectionEnd, 'end');
     } else if (code === 'Delete') {
       TEXTAREA.setRangeText('', selectionStart, selectionEnd + 1, 'end');
@@ -535,6 +558,23 @@ function handleMouseDown(e) {
   const { target } = e;
   const { innerHTML, classList, dataset } = target;
 
+  if (dataset.code === 'CapsLock') {
+    isCapsActive = !isCapsActive;
+    if (isCapsActive) {
+      changeToShift(true);
+    } else {
+      changeToShift(false);
+    }
+  }
+
+  if (dataset.code === 'ShiftLeft' || dataset.code === 'ShiftRight') {
+    if (isCapsActive) {
+      changeToShift(false);
+    } else {
+      changeToShift(true);
+    }
+  }
+
   classList.add('keyboard__key--pressed');
 
   printButton(innerHTML, dataset.code);
@@ -542,10 +582,21 @@ function handleMouseDown(e) {
 
 function handleMouseUp(e) {
   const { target } = e;
-  const { classList } = target;
+  const { classList, dataset } = target;
 
   TEXTAREA.focus();
-  classList.remove('keyboard__key--pressed');
+
+  if (dataset.code === 'ShiftLeft' || dataset.code === 'ShiftRight') {
+    if (isCapsActive) {
+      changeToShift(true);
+    } else {
+      changeToShift(false);
+    }
+  }
+
+  if (!(target.dataset.code === 'CapsLock' && isCapsActive)) {
+    classList.remove('keyboard__key--pressed');
+  }
 }
 
 // keyboard generation
@@ -614,7 +665,6 @@ function handleButtonDown(event) {
   event.preventDefault();
   TEXTAREA.focus();
   const { code, key, ctrlKey, altKey, shiftKey } = event;
-  const isCapsLock = event.getModifierState('CapsLock');
 
   if (ctrlKey && altKey) {
     const lang = sessionStorage.getItem('lang');
@@ -623,11 +673,12 @@ function handleButtonDown(event) {
     } else {
       sessionStorage.setItem('lang', 'eng');
     }
-    changeLanguage(isCapsLock);
+    changeLanguage(isCapsActive);
   }
 
   if (key === 'CapsLock') {
-    if (isCapsLock) {
+    isCapsActive = !isCapsActive;
+    if (isCapsActive) {
       changeToShift(true);
     } else {
       changeToShift(false);
@@ -635,7 +686,7 @@ function handleButtonDown(event) {
   }
 
   if (shiftKey) {
-    if (isCapsLock) {
+    if (isCapsActive) {
       changeToShift(false);
     } else {
       changeToShift(true);
@@ -651,10 +702,9 @@ function handleButtonDown(event) {
 
 function handleButtonUp(event) {
   const { code, key } = event;
-  const isCapsLock = event.getModifierState('CapsLock');
 
   if (key === 'Shift') {
-    if (isCapsLock) {
+    if (isCapsActive) {
       changeToShift(true);
     } else {
       changeToShift(false);
@@ -662,7 +712,7 @@ function handleButtonUp(event) {
   }
 
   const button = [...BUTTONS].find((b) => b.dataset.code === code);
-  if (button && !(button.dataset.code === 'CapsLock' && isCapsLock)) {
+  if (button && !(button.dataset.code === 'CapsLock' && isCapsActive)) {
     button.classList.remove('keyboard__key--pressed');
   }
 }

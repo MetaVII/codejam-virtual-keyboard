@@ -34,6 +34,7 @@ body {
   cursor: pointer;
 
   user-select: none;
+  transition: background-color 0.3s, color 0.3s;
 
   &--wide {
     width: 50px;
@@ -69,4 +70,10 @@ body {
   margin: 15% auto 10px;
 
   resize: none;
+}
+
+.legend {
+  text-align: center;
+  width: 700px;
+  margin: 10px auto 0;
 }
