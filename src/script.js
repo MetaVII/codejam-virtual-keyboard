@@ -498,7 +498,7 @@ document.body.append(CONTAINER);
 const LEGEND = document.createElement('p');
 LEGEND.classList.add('legend');
 LEGEND.innerHTML =
-  'Клавиатура создана в операционной системе Windows. Переключение языка ctrl + alt';
+  'Клавиатура создана в операционной системе Windows. Переключение языка: левые ctrl + alt';
 document.body.append(LEGEND);
 
 let isCapsActive = false;
