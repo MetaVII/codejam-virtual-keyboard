@@ -438,7 +438,7 @@ const keyList = [
         code: 'AltLeft',
       },
       {
-        eng: '',
+        eng: ' ',
         className: 'keyboard__key keyboard__key--space',
         code: 'Space',
       },
@@ -486,9 +486,67 @@ function appendElement(container, className) {
   return ELEMENT;
 }
 
+const TEXTAREA = document.createElement('textarea');
+TEXTAREA.classList.add('textarea');
+document.body.prepend(TEXTAREA);
+
 const CONTAINER = document.createElement('div');
 CONTAINER.classList.add('keyboard__container');
-document.body.prepend(CONTAINER);
+document.body.append(CONTAINER);
+
+// print button inside textarea
+function printButton(text, code) {
+  if (
+    code === 'CapsLock' ||
+    code === 'ShiftLeft' ||
+    code === 'ShiftRight' ||
+    code === 'ControlLeft' ||
+    code === 'ControlRight' ||
+    code === 'MetaLeft' ||
+    code === 'AltLeft' ||
+    code === 'AltRight'
+  ) {
+    return;
+  }
+
+  const { selectionStart, selectionEnd } = TEXTAREA;
+
+  if (code === 'Backspace' || code === 'Delete') {
+    if (selectionStart !== selectionEnd) {
+      TEXTAREA.setRangeText('', selectionStart, selectionEnd, 'end');
+    } else if (code === 'Backspace') {
+      TEXTAREA.setRangeText('', selectionStart - 1, selectionEnd, 'end');
+    } else if (code === 'Delete') {
+      TEXTAREA.setRangeText('', selectionStart, selectionEnd + 1, 'end');
+    }
+    return;
+  }
+
+  if (code === 'Enter') {
+    TEXTAREA.setRangeText('\n', selectionStart, selectionEnd, 'end');
+  } else if (code === 'Tab') {
+    TEXTAREA.setRangeText('\t', selectionStart, selectionEnd, 'end');
+  } else {
+    TEXTAREA.setRangeText(text, selectionStart, selectionEnd, 'end');
+  }
+}
+
+function handleMouseDown(e) {
+  const { target } = e;
+  const { innerHTML, classList, dataset } = target;
+
+  classList.add('keyboard__key--pressed');
+
+  printButton(innerHTML, dataset.code);
+}
+
+function handleMouseUp(e) {
+  const { target } = e;
+  const { classList } = target;
+
+  TEXTAREA.focus();
+  classList.remove('keyboard__key--pressed');
+}
 
 // keyboard generation
 keyList.forEach((row) => {
@@ -501,11 +559,9 @@ keyList.forEach((row) => {
     const KEY = appendElement(ROW, keyClassName);
     KEY.dataset.code = code;
 
-    if (lang === 'rus' && rus) {
-      KEY.innerHTML = rus;
-    } else {
-      KEY.innerHTML = eng;
-    }
+    KEY.innerHTML = lang === 'eng' ? eng : rus || eng;
+    KEY.addEventListener('mousedown', handleMouseDown);
+    KEY.addEventListener('mouseup', handleMouseUp);
   });
 });
 
@@ -556,6 +612,7 @@ function changeToShift(isPressed) {
 // button click handle
 function handleButtonDown(event) {
   event.preventDefault();
+  TEXTAREA.focus();
   const { code, key, ctrlKey, altKey, shiftKey } = event;
   const isCapsLock = event.getModifierState('CapsLock');
 
@@ -588,6 +645,7 @@ function handleButtonDown(event) {
   const button = [...BUTTONS].find((b) => b.dataset.code === code);
   if (button) {
     button.classList.add('keyboard__key--pressed');
+    printButton(button.innerHTML, code);
   }
 }
 
