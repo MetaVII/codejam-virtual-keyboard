@@ -664,7 +664,7 @@ function changeToShift(isPressed) {
 function handleButtonDown(event) {
   event.preventDefault();
   TEXTAREA.focus();
-  const { code, key, ctrlKey, altKey, shiftKey } = event;
+  const { code, key, ctrlKey, altKey, shiftKey, repeat } = event;
 
   if (ctrlKey && altKey) {
     const lang = sessionStorage.getItem('lang');
@@ -676,7 +676,7 @@ function handleButtonDown(event) {
     changeLanguage(isCapsActive);
   }
 
-  if (key === 'CapsLock') {
+  if (key === 'CapsLock' && !repeat) {
     isCapsActive = !isCapsActive;
     if (isCapsActive) {
       changeToShift(true);
