@@ -561,17 +561,17 @@ function handleMouseDown(e) {
   if (dataset.code === 'CapsLock') {
     isCapsActive = !isCapsActive;
     if (isCapsActive) {
-      changeToShift(true);
+      changeShiftState(true);
     } else {
-      changeToShift(false);
+      changeShiftState(false);
     }
   }
 
   if (dataset.code === 'ShiftLeft' || dataset.code === 'ShiftRight') {
     if (isCapsActive) {
-      changeToShift(false);
+      changeShiftState(false);
     } else {
-      changeToShift(true);
+      changeShiftState(true);
     }
   }
 
@@ -588,9 +588,9 @@ function handleMouseUp(e) {
 
   if (dataset.code === 'ShiftLeft' || dataset.code === 'ShiftRight') {
     if (isCapsActive) {
-      changeToShift(true);
+      changeShiftState(true);
     } else {
-      changeToShift(false);
+      changeShiftState(false);
     }
   }
 
@@ -641,7 +641,7 @@ function changeLanguage(isCapsLock) {
 }
 
 // shift handle
-function changeToShift(isPressed) {
+function changeShiftState(isPressed) {
   const lang = sessionStorage.getItem('lang');
   const buttonsArr = [...BUTTONS];
 
@@ -679,17 +679,17 @@ function handleButtonDown(event) {
   if (key === 'CapsLock' && !repeat) {
     isCapsActive = !isCapsActive;
     if (isCapsActive) {
-      changeToShift(true);
+      changeShiftState(true);
     } else {
-      changeToShift(false);
+      changeShiftState(false);
     }
   }
 
   if (shiftKey) {
     if (isCapsActive) {
-      changeToShift(false);
+      changeShiftState(false);
     } else {
-      changeToShift(true);
+      changeShiftState(true);
     }
   }
 
@@ -705,14 +705,17 @@ function handleButtonUp(event) {
 
   if (key === 'Shift') {
     if (isCapsActive) {
-      changeToShift(true);
+      changeShiftState(true);
     } else {
-      changeToShift(false);
+      changeShiftState(false);
     }
   }
 
   const button = [...BUTTONS].find((b) => b.dataset.code === code);
-  if (button && !(button.dataset.code === 'CapsLock' && isCapsActive)) {
+  const canButtonBeReleased =
+    button && !(button.dataset.code === 'CapsLock' && isCapsActive);
+
+  if (canButtonBeReleased) {
     button.classList.remove('keyboard__key--pressed');
   }
 }
